@@ -16,25 +16,15 @@ const routes = [
     component: () => import( '../views/Login.vue')
   },
   {
-    path: '/myAccount',
-    name: 'account',
-    component: () => import('../views/Account.vue')
-  },
-  {
-    path: '/notification',
-    name: 'notification',
-    component: () => import('../views/Notification.vue')
-  },
-  {
     path: '/gallery',
     name: 'gallery',
     component: () => import('../views/Gallery.vue')
   },
-  {
-    path: '/post',
-    name: 'post',
-    component: () => import('../views/Postphoto.vue')
-  }
+ {
+  path: '/register',
+  name: 'register',
+  component: () => import('../views/Register.vue')
+ }
 
 ]
 

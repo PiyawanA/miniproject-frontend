@@ -25,27 +25,29 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn icon @click="goToNotification()">
-        <Icon icon="mdi:bell-outline" color="white" width="35" height="30" />
-      </v-btn>
-
-      <v-menu bottom min-width="200px" rounded offset-y>
+      <v-menu bottom min-width="200px" rounded offset-y v-if="isAuth">
         <template v-slot:activator="{ on, attrs }">
           <v-avatar color="#cb7546" v-bind="attrs" v-on="on">
-            <span class="white--text text-h6">{{ user.initials }}</span>
+            <v-img
+              v-if="auth && auth.picprofile"
+              :src="'data:image/jpeg;base64,' + auth.picprofile"
+            />
+            <Icon v-else icon="fluent:emoji-32-regular" color="white" />
           </v-avatar>
         </template>
 
         <v-list>
           <v-list-item-content class="justify-center">
-            <div class="mx-auto text-center">
+            <div class="mx-3 text-center">
               <v-avatar color="#cb7546">
-                <span class="white--text text-h6">{{ user.initials }}</span>
+                <v-img
+                  v-if="auth && auth.picprofile"
+                  :src="'data:image/jpeg;base64,' + auth.picprofile"
+                />
+                <Icon v-else icon="fluent:emoji-32-regular" color="white" />
               </v-avatar>
-              <h3>{{ user.fullName }}</h3>
-              <p class="text-caption mt-1">{{ user.email }}</p>
-              <v-divider class="my-3"></v-divider>
-              <v-btn @click="goToAccount()" depressed rounded text>My Account</v-btn>
+              <h3 style="font-family: Arial, Helvetica, sans-serif;">{{ auth ? auth.username || "" : "" }}</h3>
+              <p class="text-caption mt-1">{{ auth ? auth.email || "" : "" }}</p>
               <v-divider class="my-3"></v-divider>
               <v-btn @click="goToGallery()" depressed rounded text>My Gallery</v-btn>
               <v-divider class="my-3"></v-divider>
@@ -54,6 +56,7 @@
           </v-list-item-content>
         </v-list>
       </v-menu>
+      <v-btn v-else color="#cb7564" @click="goToLogin">LOGIN</v-btn>
     </v-app-bar>
   </v-card>
 </template>
@@ -62,11 +65,7 @@
 import { Icon } from "@iconify/vue2";
 export default {
   data: () => ({
-    user: {
-      initials: "JD",
-      fullName: "John Doe",
-      email: "john.doe@doe.com"
-    },
+    auth: null,
     offset: true
   }),
 
@@ -74,17 +73,60 @@ export default {
     Icon
   },
 
+  watch: {
+    auth: {
+      handler(newAuth) {
+        if (newAuth !== null) {
+          // Update the isAuth computed property when auth becomes non-null (after a successful login)
+          this.isAuth = true;
+        } else {
+          this.isAuth = false;
+        }
+      },
+      deep: true // Watch for changes in nested properties of auth if applicable
+    }
+  },
+
+  computed: {
+    isAuth() {
+      return !!this.auth;
+    }
+  },
+
+  created() {
+    this.getAuth();
+  },
+
+  mounted() {
+    this.$EventBus.$on("getAuth", this.getAuth);
+  },
+
   methods: {
+    isAuth() {
+      return this.auth !== null ? true : false;
+    },
+
+    getAuth() {
+      this.auth = JSON.parse(localStorage.getItem("auth"));
+    },
+
     goToLogin() {
       this.$router.push("/login");
+      localStorage.clear();
+      this.auth = null;
+      // this.$EventBus.$emit("getAuth");
     },
+
     goToAccount() {
       this.$router.push("/myAccount");
     },
+
     goToNotification() {
       this.$router.push("/notification");
     },
+
     goToHome() {
+      localStorage.setItem("auth", JSON.stringify(this.auth));
       this.$router.push("/");
     },
     goToGallery() {

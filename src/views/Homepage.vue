@@ -1,154 +1,147 @@
 <template>
-  <v-container fluid>
+  <v-container>
     <v-row dense>
-        <Add/>
-      <v-col v-for="card in cards" :key="card.user" cols="12" md="3">
-        <v-card to="/login">
-          <v-img
-            :src="card.src"
-            class="white--text align-end"
-            gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-            height="200px"
-          >
-            <v-card-title v-text="card.title"> </v-card-title>
-          </v-img>
+      <Add />
+      <v-col v-for="item in items" :key="item.picId" cols="12" md="3">
+        <v-dialog v-model="dialog" max-width="600">
+          <template v-slot:activator="{ on, attrs }">
+            <v-card v-bind="attrs" v-on="on">
+              <v-img
+                :src="'data:image/jpeg;base64,' + item.pic"
+                class="white--text align-end"
+                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
+                height="200px"
+              >
+                <v-card-title v-text="item.name"></v-card-title>
+                <v-card-subtitle v-text="formattedDateTime(item.time)"></v-card-subtitle>
+              </v-img>
 
-          <v-card-actions>
-            
-              <v-list-item-avatar color="grey darken-3">
-                <v-img class="elevation-6" alt :src="card.pic"></v-img>
-              </v-list-item-avatar>
+              <v-card-actions>
+                <v-list-item-avatar color="grey darken-3">
+                  <v-img
+                    class="elevation-6"
+                    alt
+                    :src="'data:image/jpeg;base64,' + item.gallery.picprofile"
+                  ></v-img>
+                </v-list-item-avatar>
 
-              <v-list-item-content>
-                <v-list-item-title v-text="card.user"></v-list-item-title>
-              </v-list-item-content>
-            
-            <v-spacer></v-spacer>
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.gallery.galleryname"></v-list-item-title>
+                </v-list-item-content>
 
-            <v-btn @click="goToComment()" text>
-              <v-icon>mdi-comment-outline</v-icon>comment
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+                <v-spacer></v-spacer>
+
+                <v-icon>mdi-comment-outline</v-icon>
+                <div>comment</div>
+              </v-card-actions>
+            </v-card>
+          </template>
+
+          <template>
+            <v-card>
+              <v-toolbar color="#893744" dark>
+                <v-list-item-avatar color="grey darken-3">
+                  <v-img
+                    class="elevation-6"
+                    alt
+                    :src="'data:image/jpeg;base64,' + item.gallery.picprofile"
+                  ></v-img>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.gallery.galleryname"></v-list-item-title>
+                </v-list-item-content>
+              </v-toolbar>
+              <v-card-text>
+                <v-card>
+                  <v-img
+                    style=" height: 100%;
+                            width: 100%;
+                            margin-top: 10px;
+                            border-radius: 8px;"
+                    :src="'data:image/jpeg;base64,' + item.pic"
+                  />
+                  <v-card-title v-text="item.name"></v-card-title>
+                  <v-card-text v-text="item.caption"></v-card-text>
+                </v-card>
+
+                <comment :id="item.picId" />
+              </v-card-text>
+
+              <v-card-actions class="justify-center">
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field
+                      v-model="message"
+                      append-outer-icon="mdi-send"
+                      @click:append-outer="sendMessage"
+                      outlined
+                      single-line
+                      label="Comment"
+                      type="text"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+              </v-card-actions>
+            </v-card>
+          </template>
+        </v-dialog>
       </v-col>
     </v-row>
+      <footer />
   </v-container>
 </template>
 
 <script>
-import Add from "../components/Addphoto.vue"
+import Add from "../components/Addphoto.vue";
+import comment from "../components/Comment.vue";
+
+import { request } from "../../axios-config";
+import dayjs from "dayjs";
+
+// import "dayjs/locale/th";
+// dayjs.locale("th");
 
 export default {
-  components:{
-    Add
+  components: {
+    Add,
+    comment,
+    
   },
-  data: () => ({
-    medthods: {
-      goToAccount() {
-        this.$router.push("/myAccount");
-      },
-      goToComment() {
-        this.$router.push('/comment')
-      },
-      goTo() {
-        this.$router.push('/')
-        
+
+  methods: {
+    formattedDateTime(date) {
+      // Use dayjs to format the current date and time
+      return dayjs(date).format("DD MMMM YYYY ");
+    },
+    goToAccount() {
+      this.$router.push("/myAccount");
+    },
+    async fetchItems() {
+      try {
+        const response = await request.get("/photo");
+        this.items = response.data;
+        if (response.data) {
+          console.log(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching board game data:", error);
       }
     },
+    sendMessage() {}
+  },
 
-    cards: [
-      {
-        user: "You",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Pre-fab homes",
-        src: "https://cdn.vuetifyjs.com/images/cards/house.jpg"
-      },
-      {
-        user: "You1",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Favorite road trips",
-        src: "https://cdn.vuetifyjs.com/images/cards/road.jpg"
-      },
-      {
-        user: "You3",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Best airlines",
-        src: "https://cdn.vuetifyjs.com/images/cards/plane.jpg"
-      },
-      {
-        user: "You4",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Best airlines",
-        src: "https://cdn.vuetifyjs.com/images/cards/plane.jpg"
-      },
-      {
-        user: "You5",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Best airlines",
-        src: "https://cdn.vuetifyjs.com/images/cards/plane.jpg"
-      },
-      {
-        user: "You6",
-        pic: "",
-        title: "Best airlines",
-        src: "https://cdn.vuetifyjs.com/images/cards/plane.jpg"
-      },
-      {
-        user: "You7",
-        pic: "",
-        title: "Pre-fab homes",
-        src: "https://cdn.vuetifyjs.com/images/cards/house.jpg"
-      },
-      {
-        user: "You8",
-        pic: "",
-        title: "Favorite road trips",
-        src: "https://cdn.vuetifyjs.com/images/cards/road.jpg"
-      },
-      {
-        user: "You",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Pre-fab homes",
-        src: "https://cdn.vuetifyjs.com/images/cards/house.jpg"
-      },
-      {
-        user: "You1",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Favorite road trips",
-        src: "https://cdn.vuetifyjs.com/images/cards/road.jpg"
-      },
-      {
-        user: "You3",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Best airlines",
-        src: "https://cdn.vuetifyjs.com/images/cards/plane.jpg"
-      },
-      {
-        user: "You4",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Best airlines",
-        src: "https://cdn.vuetifyjs.com/images/cards/plane.jpg"
-      },
-      {
-        user: "You5",
-        pic:
-          "https://i.pinimg.com/originals/d7/78/c8/d778c8e7d4b277c83d11e6dd09db8d24.jpg",
-        title: "Best airlines",
-        src: "https://cdn.vuetifyjs.com/images/cards/plane.jpg"
-      },
-    ]
-  })
+  created() {
+    this.fetchItems();
+  },
+
+  data() {
+    return {
+      items: []
+    };
+  }
 };
 </script>
+
 
 <style>
 </style>

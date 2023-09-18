@@ -1,7 +1,7 @@
 <template>
   <v-container>
+    <Add />
     <v-row dense>
-      <Add />
       <v-col v-for="item in items" :key="item.picId" cols="12" md="3">
         <v-dialog v-model="dialog" max-width="600">
           <template v-slot:activator="{ on, attrs }">
@@ -40,16 +40,20 @@
           <template>
             <v-card>
               <v-toolbar color="#893744" dark>
-                <v-list-item-avatar color="grey darken-3">
-                  <v-img
-                    class="elevation-6"
-                    alt
-                    :src="'data:image/jpeg;base64,' + item.gallery.picprofile"
-                  ></v-img>
-                </v-list-item-avatar>
-                <v-list-item-content>
-                  <v-list-item-title v-text="item.gallery.galleryname"></v-list-item-title>
-                </v-list-item-content>
+                <router-link :to="`/gallery/${item.gallery.galleryId}`" style="text-decoration: none;">
+                  <v-list-item>
+                    <v-list-item-avatar color="grey darken-3">
+                      <v-img
+                        class="elevation-6"
+                        alt
+                        :src="'data:image/jpeg;base64,' + item.gallery.picprofile"
+                      ></v-img>
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-title v-text="item.gallery.galleryname"></v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </router-link>
               </v-toolbar>
               <v-card-text>
                 <v-card>
@@ -61,33 +65,18 @@
                     :src="'data:image/jpeg;base64,' + item.pic"
                   />
                   <v-card-title v-text="item.name"></v-card-title>
-                  <v-card-text v-text="item.caption"></v-card-text>
+                  <v-card-text style="color: #212121;" v-text="item.caption"></v-card-text>
+
+                  <v-card-subtitle v-text="'Posted: '+formattedDateTime(item.time)"></v-card-subtitle>
                 </v-card>
 
                 <comment :id="item.picId" />
               </v-card-text>
-
-              <v-card-actions class="justify-center">
-                <v-row>
-                  <v-col cols="12">
-                    <v-text-field
-                      v-model="message"
-                      append-outer-icon="mdi-send"
-                      @click:append-outer="sendMessage"
-                      outlined
-                      single-line
-                      label="Comment"
-                      type="text"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-card-actions>
             </v-card>
           </template>
         </v-dialog>
       </v-col>
     </v-row>
-      <footer />
   </v-container>
 </template>
 
@@ -98,14 +87,10 @@ import comment from "../components/Comment.vue";
 import { request } from "../../axios-config";
 import dayjs from "dayjs";
 
-// import "dayjs/locale/th";
-// dayjs.locale("th");
-
 export default {
   components: {
     Add,
-    comment,
-    
+    comment
   },
 
   methods: {
@@ -124,14 +109,34 @@ export default {
           console.log(response.data);
         }
       } catch (error) {
-        console.error("Error fetching board game data:", error);
+        console.error("Error data:", error);
       }
     },
-    sendMessage() {}
+
+    async search(textSearch) {
+      try {
+        const response = await request.get("/searchGallery", {
+          params: {
+            galleryname: textSearch
+          }
+        });
+
+        if (response.data) {
+          console.log(response.data);
+          this.items = response.data;
+        }
+      } catch (error) {
+        console.error("Error data:", error);
+      }
+    }
   },
 
   created() {
     this.fetchItems();
+  },
+
+  mounted() {
+    this.$EventBus.$on("search", this.search);
   },
 
   data() {

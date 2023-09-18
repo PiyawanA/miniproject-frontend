@@ -24,7 +24,13 @@ const routes = [
   path: '/register',
   name: 'register',
   component: () => import('../views/Register.vue')
- }
+ },
+ {
+  path: '/gallery/:id',
+  name: 'galleryById',
+  component: () => import('../views/Othergallery.vue')
+}
+
 
 ]
 

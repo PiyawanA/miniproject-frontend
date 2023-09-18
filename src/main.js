@@ -6,6 +6,7 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 import './main.css'
 
+
 Vue.config.productionTip = false
 Vue.prototype.$EventBus = new Vue()
 new Vue({

@@ -7,21 +7,25 @@
 
       <v-spacer></v-spacer>
 
-      <v-autocomplete
-        v-model="select"
-        :loading="loading"
-        :items="items"
-        :search-input.sync="search"
-        cache-items
+      <v-text-field
+        v-model="textSearch"
         class="mx-4"
-        flat
-        hide-no-data
-        hide-details
-        label="search"
+        label="Search(gallery name)"
+        :rules="rules"
+        hide-details="auto"
         solo-inverted
         rounded
         solo
-      ></v-autocomplete>
+        flat
+        hide-no-data
+        cache-items
+        dark
+        @keyup.enter="search"
+      >
+        <v-btn icon slot="append" @click="search"  color="#f6b82f">
+          <Icon icon="mdi:search" width="30" height="30" />
+        </v-btn>
+      </v-text-field>
 
       <v-spacer></v-spacer>
 
@@ -46,8 +50,10 @@
                 />
                 <Icon v-else icon="fluent:emoji-32-regular" color="white" />
               </v-avatar>
-              <h3 style="font-family: Arial, Helvetica, sans-serif;">{{ auth ? auth.username || "" : "" }}</h3>
-              <p class="text-caption mt-1">{{ auth ? auth.email || "" : "" }}</p>
+              <h3
+                style="font-family: Arial, Helvetica, sans-serif;"
+              >{{ auth ? auth.galleryname || "" : "" }}</h3>
+              <p class="text-caption mt-1">@{{ auth ? auth.username || "" : "" }}</p>
               <v-divider class="my-3"></v-divider>
               <v-btn @click="goToGallery()" depressed rounded text>My Gallery</v-btn>
               <v-divider class="my-3"></v-divider>
@@ -63,10 +69,12 @@
 
 <script>
 import { Icon } from "@iconify/vue2";
+
 export default {
   data: () => ({
     auth: null,
-    offset: true
+    offset: true,
+    textSearch: ""
   }),
 
   components: {
@@ -102,6 +110,9 @@ export default {
   },
 
   methods: {
+    async search() {
+      this.$EventBus.$emit("search", this.textSearch);
+    },
     isAuth() {
       return this.auth !== null ? true : false;
     },

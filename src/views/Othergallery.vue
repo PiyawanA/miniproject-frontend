@@ -1,13 +1,10 @@
-<template>
+  <template>
   <v-container>
     <v-card>
       <v-toolbar color="#e0a4a6">
         <div>
           <v-card-title>{{ user.galleryname }}</v-card-title>
         </div>
-
-        <v-spacer></v-spacer>
-        <edit />
       </v-toolbar>
     </v-card>
     <v-card class="pa-4 mb-2">
@@ -21,7 +18,7 @@
         <div>
           <v-card-title>{{ user.firstname }} {{ user.lastname }}</v-card-title>
           <v-card-subtitle>@{{ user.username }}</v-card-subtitle>
-          <v-card-text>{{ user.description }}</v-card-text>
+          <v-card-text>{{ items.description }}</v-card-text>
           <v-card-text>Joined: {{ formattedDateTime(user.time) }}</v-card-text>
         </div>
       </div>
@@ -44,6 +41,13 @@
               </v-img>
 
               <v-card-actions>
+                <v-list-item-avatar color="grey darken-3">
+                  <v-img class="elevation-6" alt :src="'data:image/jpeg;base64,' + user.picprofile"></v-img>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title v-text="user.galleryname"></v-list-item-title>
+                </v-list-item-content>
+                <v-spacer></v-spacer>
                 <v-icon>mdi-comment-outline</v-icon>
                 <div>comment</div>
               </v-card-actions>
@@ -53,29 +57,28 @@
           <template>
             <v-card>
               <v-toolbar color="#893744" dark>
+                <v-list-item-avatar color="grey darken-3">
+                  <v-img class="elevation-6" alt :src="'data:image/jpeg;base64,' + user.picprofile"></v-img>
+                </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title v-text="item.name"></v-list-item-title>
                 </v-list-item-content>
                 <v-spacer></v-spacer>
-                <v-btn icon dark class="center-icon" @click="deletePost(item.picId)">
-                  <v-icon dark style="width: 20px; height: 20px ">mdi-delete</v-icon>
-                </v-btn>
               </v-toolbar>
 
               <v-card-text>
                 <v-card>
                   <v-img
                     style=" height: 100%;
-                            width: 100%;
-                            margin-top: 10px;
-                            border-radius: 8px;"
+                                width: 100%;
+                                margin-top: 10px;
+                                border-radius: 8px;"
                     :src="'data:image/jpeg;base64,' + item.pic"
                   />
-                  <v-card-text v-text="item.caption" style="color: black;"></v-card-text>
+                  <v-card-title v-text="item.name"></v-card-title>
+                  <v-card-text v-text="item.caption"></v-card-text>
                   <v-card-subtitle v-text="'Posted: '+formattedDateTime(item.time)"></v-card-subtitle>
-
                 </v-card>
-
                 <comment :id="item.picId" />
               </v-card-text>
             </v-card>
@@ -83,11 +86,10 @@
         </v-dialog>
       </v-col>
     </v-row>
-    <footer />
   </v-container>
 </template>
-
-<script>
+    
+    <script>
 import Add from "../components/Addphoto.vue";
 import comment from "../components/Comment.vue";
 import edit from "../components/Editprofile.vue";
@@ -105,73 +107,47 @@ export default {
     edit
   },
 
+  data() {
+    return {
+      items: [],
+      user: null, // Initialize user as null or an empty object
+      itemId: null
+    };
+  },
+
+  created() {
+    this.itemId = this.$route.params.id;
+    console.log("itemId:", this.itemId);
+    this.fetchItems();
+  },
+
   methods: {
     formattedDateTime(date) {
       // Use dayjs to format the current date and time
       return dayjs(date).format("DD MMMM YYYY ");
     },
+
     async fetchItems() {
       try {
-        const response = await request.get(
-          `/photo/${JSON.parse(localStorage.getItem("auth")).galleryId}`
-        );
+        const response = await request.get(`/photo/${this.itemId}`);
+        console.log("Response data:", response.data);
         this.items = response.data;
-        if (response.data) {
-          console.log(response.data);
+
+        if (this.items.length > 0) {
+          this.user = this.items[0].gallery;
+          console.log(this.user);
+        } else {
+          console.log("No items found");
         }
       } catch (error) {
         console.error("Error:", error);
       }
-    },
-    async deletePost(id) {
-      console.log("id", id);
-      Swal.fire({
-        title: "Notification!",
-        text: `Do you want to delete ?`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Confirm",
-        cancelButtonText: "Cancle"
-      }).then(async result => {
-        if (result.isConfirmed) {
-          try {
-            const response = await request.delete(`/photo/${id}`);
-            if (response.status === 200) {
-              Swal.fire({
-                title: "Delete successfully!",
-                text: `delete successfully`,
-                icon: "success",
-                confirmButtonText: "Confirm",
-                timer: 1000
-              });
-              this.$router.go(0);
-            }
-          } catch (err) {
-            Swal.fire({
-              title: "Wrong!",
-              text: "Cannot delete",
-              icon: "error",
-              confirmButtonText: "Confirm"
-            });
-          }
-        }
-      });
     }
-  },
-
-  created() {
-    this.fetchItems();
-  },
-
-  data() {
-    return {
-      items: [],
-      user: JSON.parse(localStorage.getItem("auth")),
-    };
   }
 };
 </script>
-
-
-<style>
+    
+    
+    <style>
 </style>
+    

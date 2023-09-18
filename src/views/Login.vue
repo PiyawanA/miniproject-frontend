@@ -46,7 +46,7 @@ export default {
     Password: "",
     PasswordRules: [
       value => {
-        if (/[^0-9]/.test(value)) return true;
+        if (value?.length > 0) return true;
 
         return "please input password";
       }
@@ -70,7 +70,7 @@ export default {
     }
   }
 };
-</script>
+</script scoped>
 
 <style>
 .styleLogin {

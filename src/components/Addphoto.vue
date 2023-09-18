@@ -11,7 +11,7 @@
         <template>
           <v-card>
             <v-toolbar flat color="#893744" dark>
-              <v-toolbar-title>Submit a post</v-toolbar-title>
+              <v-toolbar-title>Post a photo</v-toolbar-title>
             </v-toolbar>
 
             <v-card-text style="margin-top:20px">
@@ -85,7 +85,7 @@ export default {
           this.$router.go(0)
         }
       } catch (error) {
-        console.error("Error Create BoardGame:", error);
+        console.error("Error Create :", error);
       }
     },
 
@@ -96,7 +96,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .style {
   position: fixed;
   bottom: 20px;

@@ -122,26 +122,26 @@ export default {
     },
 
     goToLogin() {
-      this.$router.push("/login");
+      this.$router.push({path: '/login'}).catch(()=>{})
       localStorage.clear();
       this.auth = null;
       // this.$EventBus.$emit("getAuth");
     },
 
     goToAccount() {
-      this.$router.push("/myAccount");
+      this.$router.push({path: '/myAccount'}).catch(()=>{})
     },
 
     goToNotification() {
-      this.$router.push("/notification");
+      this.$router.push({path: '/notification'}).catch(()=>{})
     },
 
     goToHome() {
       localStorage.setItem("auth", JSON.stringify(this.auth));
-      this.$router.push("/");
+      this.$router.push({path: '/'}).catch(()=>{})
     },
     goToGallery() {
-      this.$router.push("/gallery");
+      this.$router.push({path: '/gallery'}).catch(()=>{})
     }
   }
 };

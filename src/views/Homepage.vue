@@ -99,7 +99,8 @@ export default {
       return dayjs(date).format("DD MMMM YYYY ");
     },
     goToAccount() {
-      this.$router.push("/myAccount");
+      this.$router.push({path: '/myAccount'}).catch(()=>{})
+
     },
     async fetchItems() {
       try {

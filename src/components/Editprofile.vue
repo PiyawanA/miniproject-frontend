@@ -166,9 +166,9 @@ export default {
     }
   }
 };
-</script scoped>
+</script >
 
-<style>
+<style scoped>
 .avatar-container {
   position: relative;
 }
